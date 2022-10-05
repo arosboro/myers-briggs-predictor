@@ -1,6 +1,10 @@
 .DS_Store
 node_modules
 /dist
+/target
+/www/pkg
+/wasm-pack.log
+
 
 /tests/e2e/videos/
 /tests/e2e/screenshots/
