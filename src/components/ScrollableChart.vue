@@ -43,6 +43,7 @@ figure.chart {
   width: auto;
   margin: 1em;
   padding: 0;
+  overflow-x: scroll;
 }
 figure.chart ul {
   list-style: none;
@@ -79,7 +80,6 @@ figure.chart ul li {
   margin-left: 20px;
 }
 .scrollable-chart-container {
-  overflow-x: scroll;
   padding-bottom: 1em;
 }
 </style>
