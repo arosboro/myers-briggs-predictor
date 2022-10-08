@@ -1,3 +1,11 @@
+declare global {
+  interface Window {
+    logProgress: (progress: number) => void;
+    logBatchLoss: (loss: number) => void;
+    networkWeights: () => string;
+  }
+}
+
 import { createApp } from "vue";
 import App from "./App.vue";
 import "./registerServiceWorker";

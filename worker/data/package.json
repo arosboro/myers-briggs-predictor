@@ -1,0 +1,22 @@
+{
+  "name": "mbti-data",
+  "version": "1.0.0",
+  "description": "An MBTI graph dataset and weights to be used by mbti-worker for training in the browser.",
+  "main": "mbti.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "typescript"
+  ],
+  "author": "Andrew Rosborough",
+  "license": "APACHE-2.0",
+  "files": [
+    "mbti.data.ts",
+    "mbti.types.ts",
+    "mbti_samples.json",
+    "network.json"
+  ],
+  "browser": "mbti.data.js",
+  "types": "mbti.types.d.ts"
+}

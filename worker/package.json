@@ -1,0 +1,19 @@
+{
+  "name": "mbti-worker",
+  "version": "1.0.0",
+  "description": "A wasm worker to handle machine learning aspect of recognizing MBTI graphs.",
+  "main": "mbti.worker.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "wasm"
+  ],
+  "author": "Andrew Rosborough",
+  "license": "GPL-3.0-or-later",
+  "files": [
+    "mbti.worker.ts"
+  ],
+  "browser": "mbti.worker.js",
+  "types": "data/mbti.types.d.ts"
+}

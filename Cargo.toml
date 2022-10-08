@@ -21,7 +21,7 @@ lto = true
 
 [features]
 # If you uncomment this line, it will enable `wee_alloc`:
-#default = ["wee_alloc"]
+# default = ["wee_alloc"]
 
 [dependencies]
 easy-ml = { version = "1.8.2", features = ["serde"] }

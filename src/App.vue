@@ -1,7 +1,7 @@
 <template>
   <nav>
     <router-link to="/">Home</router-link> |
-    <router-link to="/about">About</router-link>
+    <router-link to="/training-grounds">Training Grounds</router-link>
   </nav>
   <router-view />
 </template>
@@ -16,7 +16,11 @@
 }
 
 nav {
-  padding: 30px;
+  padding: 1em;
+
+  h1 {
+    margin: 1em 0;
+  }
 
   a {
     font-weight: bold;

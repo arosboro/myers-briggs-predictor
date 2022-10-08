@@ -6,38 +6,37 @@
     "jsx": "preserve",
     "moduleResolution": "node",
     "experimentalDecorators": true,
-    "skipLibCheck": true,
+    "skipLibCheck": false,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
     "useDefineForClassFields": true,
     "sourceMap": true,
     "baseUrl": ".",
-    "types": [
-      "webpack-env",
-      "mocha",
-      "chai"
-    ],
+    "types": ["webpack-env", "mocha", "chai"],
     "paths": {
-      "@/*": [
-        "src/*"
-      ]
+      "@/*": ["src/*"],
+      "@worker/*": ["worker/*"],
+      "@data/*": ["worker/data/*"]
     },
     "lib": [
       "esnext",
       "dom",
       "dom.iterable",
-      "scripthost"
+      "scripthost",
+      "WebWorker",
+      "WebWorker.ImportScripts",
+      "Webworker.Iterable"
     ]
   },
   "include": [
     "src/**/*.ts",
     "src/**/*.tsx",
     "src/**/*.vue",
-    "tests/**/*.ts",
-    "tests/**/*.tsx"
+    "worker/**/*.ts",
+    "worker/**/*.d.ts",
+    "test/**/*.ts",
+    "test/**/*.tsx"
   ],
-  "exclude": [
-    "node_modules"
-  ]
+  "exclue": ["node_modules"]
 }

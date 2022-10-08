@@ -2,7 +2,7 @@
 node_modules
 /dist
 /target
-/www/pkg
+/worker/pkg
 /wasm-pack.log
 
 
