@@ -33,11 +33,11 @@ Type Indicators (MBTIs) are focused on.
 
 ## Current State of Affairs
 
-1. Procedurally generated Signature Images have been provided in json format.
-2. Network weights for a network trained to thousands of epochs have been provided.
-3. Vue Components replecate the scaffold's functionality with Typescript
-4. WebWorker ported from JavaScript to TypeScript
-5. Vue niceties such as prettier ensure that the code smell is reduced
+1. Procedurally generated 16x16 pixel heatmaps with validated labels have been provided
+2. Network weights for a network trained to thousands of epochs have been provided
+3. Vue Components replecate the scaffold's User Interface functionality with TypeScript
+4. WebWorker and data fetching ported from JavaScript to TypeScript
+5. Vue.js niceties such as prettier ensure that the code smell is reduced
 
 ## Roadmap
 
@@ -51,6 +51,8 @@ Type Indicators (MBTIs) are focused on.
 7. Final implementation deployed to TestNet V3
 
 ## Project setup
+
+_Recommended: Set prettier as the default formatter for saving the files in this project._
 
 ```
 npm install
