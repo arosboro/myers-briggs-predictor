@@ -27,6 +27,10 @@ This repository utilizes the above scaffold with a revamped frontend implemented
 Vue.js. As the name suggests, instead of MNIST Number identification, Myers Briggs
 Type Indicators (MBTIs) are focused on.
 
+## Screenshot
+
+<img src="../main/screenshots/webpage.png?raw=true" height="250px"></img>
+
 ## Current State of Affairs
 
 1. Procedurally generated Signature Images have been provided in json format.
