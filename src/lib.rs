@@ -66,8 +66,8 @@ const HEIGHT: usize = 16;
 // const SAMPLES: usize = 6483;
 const TRAINING_SIZE: usize = 5186;
 const TESTING_SIZE: usize = 1297;
-const LEARNING_RATE: f64 = 0.0001;
-const LEARNING_RATE_DISCOUNT_FACTOR: f64 = 0.9999;
+const LEARNING_RATE: f64 = 0.001;
+const LEARNING_RATE_DISCOUNT_FACTOR: f64 = 0.999;
 
 /// mbti data is grayscale 0-1 range
 type Pixel = f64;
@@ -485,7 +485,7 @@ impl<'a> NeuralNetworkTraining<'a> {
         }
         NeuralNetworkTraining {
             weights,
-            learning_rate: LEARNING_RATE * LEARNING_RATE_DISCOUNT_FACTOR.powi(epochs - 101),
+            learning_rate: LEARNING_RATE * LEARNING_RATE_DISCOUNT_FACTOR.powi(epochs),
         }
     }
 
