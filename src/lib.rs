@@ -66,8 +66,8 @@ const HEIGHT: usize = 16;
 // const SAMPLES: usize = 6483;
 const TRAINING_SIZE: usize = 5186;
 const TESTING_SIZE: usize = 1297;
-const LEARNING_RATE: f64 = 0.001;
-const LEARNING_RATE_DISCOUNT_FACTOR: f64 = 0.999;
+const LEARNING_RATE: f64 = 0.2;
+const LEARNING_RATE_DISCOUNT_FACTOR: f64 = 0.95;
 
 /// mbti data is grayscale 0-1 range
 type Pixel = f64;
@@ -127,22 +127,22 @@ pub enum MBType {
 #[repr(u8)]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum MBTI {
-    ESFJ = 0b01100110,  // "ESFJ",
-    ESFP = 0b01100101,  // "ESFP",
-    ESTJ = 0b01101010,  // "ESTJ",
-    ESTP = 0b01101001,  // "ESTP",
-    ENFJ = 0b01010110,  // "ENFJ",
     ENFP = 0b01010101,  // "ENFP",
-    ENTJ = 0b01011010,  // "ENTJ",
+    ENFJ = 0b01010110,  // "ENFJ",
     ENTP = 0b01011001,  // "ENTP",
-    ISFJ = 0b10100110,  // "ISFJ",
-    ISFP = 0b10100101,  // "ISFP",
-    ISTJ = 0b10101010, // "ISTJ",
-    ISTP = 0b10101001, // "ISTP",
-    INFJ = 0b10010110, // "INFJ",
+    ENTJ = 0b01011010,  // "ENTJ",
+    ESFP = 0b01100101,  // "ESFP",
+    ESFJ = 0b01100110,  // "ESFJ",
+    ESTP = 0b01101001,  // "ESTP",
+    ESTJ = 0b01101010,  // "ESTJ",
     INFP = 0b10010101, // "INFP",
-    INTJ = 0b10011010, // "INTJ",
+    INFJ = 0b10010110, // "INFJ",
     INTP = 0b10011001, // "INTP",
+    INTJ = 0b10011010, // "INTJ",
+    ISFP = 0b10100101,  // "ISFP",
+    ISFJ = 0b10100110,  // "ISFJ",
+    ISTP = 0b10101001, // "ISTP",
+    ISTJ = 0b10101010, // "ISTJ",
 }
 
 impl TryFrom<u8> for MBTI {
@@ -150,22 +150,22 @@ impl TryFrom<u8> for MBTI {
 
     fn try_from(integer: u8) -> Result<Self, Self::Error> {
         match integer {
-            0b01100110 => Ok(MBTI::ESFJ),
-            0b01100101 => Ok(MBTI::ESFP),
-            0b01101010 => Ok(MBTI::ESTJ),
-            0b01101001 => Ok(MBTI::ESTP),
-            0b01010110 => Ok(MBTI::ENFJ),
             0b01010101 => Ok(MBTI::ENFP),
-            0b01011010 => Ok(MBTI::ENTJ),
+            0b01010110 => Ok(MBTI::ENFJ),
             0b01011001 => Ok(MBTI::ENTP),
-            0b10100110 => Ok(MBTI::ISFJ),
-            0b10100101 => Ok(MBTI::ISFP),
-            0b10101010 => Ok(MBTI::ISTJ),
-            0b10101001 => Ok(MBTI::ISTP),
-            0b10010110 => Ok(MBTI::INFJ),
+            0b01011010 => Ok(MBTI::ENTJ),
+            0b01100101 => Ok(MBTI::ESFP),
+            0b01100110 => Ok(MBTI::ESFJ),
+            0b01101001 => Ok(MBTI::ESTP),
+            0b01101010 => Ok(MBTI::ESTJ),
             0b10010101 => Ok(MBTI::INFP),
-            0b10011010 => Ok(MBTI::INTJ),
+            0b10010110 => Ok(MBTI::INFJ),
             0b10011001 => Ok(MBTI::INTP),
+            0b10011010 => Ok(MBTI::INTJ),
+            0b10100101 => Ok(MBTI::ISFP),
+            0b10100110 => Ok(MBTI::ISFJ),
+            0b10101001 => Ok(MBTI::ISTP),
+            0b10101010 => Ok(MBTI::ISTJ),
             _ => Err("Invalid MBTI type"),
         }
     }
@@ -174,22 +174,22 @@ impl TryFrom<u8> for MBTI {
 impl From<&str> for MBTI {
     fn from(label: &str) -> Self {
         match label {
-            "ESFJ" => MBTI::ESFJ,
-            "ESFP" => MBTI::ESFP,
-            "ESTJ" => MBTI::ESTJ,
-            "ESTP" => MBTI::ESTP,
-            "ENFJ" => MBTI::ENFJ,
             "ENFP" => MBTI::ENFP,
-            "ENTJ" => MBTI::ENTJ,
+            "ENFJ" => MBTI::ENFJ,
             "ENTP" => MBTI::ENTP,
-            "ISFJ" => MBTI::ISFJ,
-            "ISFP" => MBTI::ISFP,
-            "ISTJ" => MBTI::ISTJ,
-            "ISTP" => MBTI::ISTP,
-            "INFJ" => MBTI::INFJ,
+            "ENTJ" => MBTI::ENTJ,
+            "ESFP" => MBTI::ESFP,
+            "ESFJ" => MBTI::ESFJ,
+            "ESTP" => MBTI::ESTP,
+            "ESTJ" => MBTI::ESTJ,
             "INFP" => MBTI::INFP,
-            "INTJ" => MBTI::INTJ,
+            "INFJ" => MBTI::INFJ,
             "INTP" => MBTI::INTP,
+            "INTJ" => MBTI::INTJ,
+            "ISFP" => MBTI::ISFP,
+            "ISFJ" => MBTI::ISFJ,
+            "ISTP" => MBTI::ISTP,
+            "ISTJ" => MBTI::ISTJ,
             _ => panic!("Invalid MBTI type"),
         }
     }
@@ -198,22 +198,22 @@ impl From<&str> for MBTI {
 impl From<usize> for MBTI {
     fn from(label: usize) -> Self {
         match label {
-            0 => MBTI::ESFJ,
-            1 => MBTI::ESFP,
-            2 => MBTI::ESTJ,
-            3 => MBTI::ESTP,
-            4 => MBTI::ENFJ,
-            5 => MBTI::ENFP,
-            6 => MBTI::ENTJ,
-            7 => MBTI::ENTP,
-            8 => MBTI::ISFJ,
-            9 => MBTI::ISFP,
-            10 => MBTI::ISTJ,
-            11 => MBTI::ISTP,
-            12 => MBTI::INFJ,
-            13 => MBTI::INFP,
-            14 => MBTI::INTJ,
-            15 => MBTI::INTP,
+            0 => MBTI::ENFP,
+            1 => MBTI::ENFJ,
+            2 => MBTI::ENTP,
+            3 => MBTI::ENTJ,
+            4 => MBTI::ESFP,
+            5 => MBTI::ESFJ,
+            6 => MBTI::ESTP,
+            7 => MBTI::ESTJ,
+            8 => MBTI::INFP,
+            9 => MBTI::INFJ,
+            10 => MBTI::INTP,
+            11 => MBTI::INTJ,
+            12 => MBTI::ISFP,
+            13 => MBTI::ISFJ,
+            14 => MBTI::ISTP,
+            15 => MBTI::ISTJ,
             _ => panic!("Invalid MBTI type"),
         }
     }
@@ -222,22 +222,22 @@ impl From<usize> for MBTI {
 impl From<MBTI> for usize {
     fn from(label: MBTI) -> Self {
         match label {
-            MBTI::ESFJ => 0,
-            MBTI::ESFP => 1,
-            MBTI::ESTJ => 2,
-            MBTI::ESTP => 3,
-            MBTI::ENFJ => 4,
-            MBTI::ENFP => 5,
-            MBTI::ENTJ => 6,
-            MBTI::ENTP => 7,
-            MBTI::ISFJ => 8,
-            MBTI::ISFP => 9,
-            MBTI::ISTJ => 10,
-            MBTI::ISTP => 11,
-            MBTI::INFJ => 12,
-            MBTI::INFP => 13,
-            MBTI::INTJ => 14,
-            MBTI::INTP => 15,
+            MBTI::ENFP => 0,
+            MBTI::ENFJ => 1,
+            MBTI::ENTP => 2,
+            MBTI::ENTJ => 3,
+            MBTI::ESFP => 4,
+            MBTI::ESFJ => 5,
+            MBTI::ESTP => 6,
+            MBTI::ESTJ => 7,
+            MBTI::INFP => 8,
+            MBTI::INFJ => 9,
+            MBTI::INTP => 10,
+            MBTI::INTJ => 11,
+            MBTI::ISFP => 12,
+            MBTI::ISFJ => 13,
+            MBTI::ISTP => 14,
+            MBTI::ISTJ => 15,
         }
     }
 }
@@ -245,22 +245,22 @@ impl From<MBTI> for usize {
 impl From<MBTI> for &str {
     fn from(label: MBTI) -> Self {
         match label {
-            MBTI::ESFJ => "ESFJ",
-            MBTI::ESFP => "ESFP",
-            MBTI::ESTJ => "ESTJ",
-            MBTI::ESTP => "ESTP",
-            MBTI::ENFJ => "ENFJ",
             MBTI::ENFP => "ENFP",
-            MBTI::ENTJ => "ENTJ",
+            MBTI::ENFJ => "ENFJ",
             MBTI::ENTP => "ENTP",
-            MBTI::ISFJ => "ISFJ",
-            MBTI::ISFP => "ISFP",
-            MBTI::ISTJ => "ISTJ",
-            MBTI::ISTP => "ISTP",
-            MBTI::INFJ => "INFJ",
+            MBTI::ENTJ => "ENTJ",
+            MBTI::ESFP => "ESFP",
+            MBTI::ESFJ => "ESFJ",
+            MBTI::ESTP => "ESTP",
+            MBTI::ESTJ => "ESTJ",
             MBTI::INFP => "INFP",
-            MBTI::INTJ => "INTJ",
+            MBTI::INFJ => "INFJ",
             MBTI::INTP => "INTP",
+            MBTI::INTJ => "INTJ",
+            MBTI::ISFP => "ISFP",
+            MBTI::ISFJ => "ISFJ",
+            MBTI::ISTP => "ISTP",
+            MBTI::ISTJ => "ISTJ",
         }
     }
 }
@@ -485,7 +485,7 @@ impl<'a> NeuralNetworkTraining<'a> {
         }
         NeuralNetworkTraining {
             weights,
-            learning_rate: LEARNING_RATE * LEARNING_RATE_DISCOUNT_FACTOR.powi(epochs),
+            learning_rate: LEARNING_RATE * LEARNING_RATE_DISCOUNT_FACTOR.powi(epochs - 1175),
         }
     }
 

@@ -50,22 +50,22 @@ export enum MBType {
 }
 
 export enum MBTILabels {
-  "ENFJ" = 0b01010110, // "ENFJ",
   "ENFP" = 0b01010101, // "ENFP",
-  "ENTJ" = 0b01011010, // "ENTJ",
+  "ENFJ" = 0b01010110, // "ENFJ",
   "ENTP" = 0b01011001, // "ENTP",
-  "ESFJ" = 0b01100110, // "ESFJ",
+  "ENTJ" = 0b01011010, // "ENTJ",
   "ESFP" = 0b01100101, // "ESFP",
-  "ESTJ" = 0b01101010, // "ESTJ",
+  "ESFJ" = 0b01100110, // "ESFJ",
   "ESTP" = 0b01101001, // "ESTP",
-  "INFJ" = 0b10010110, // "INFJ",
+  "ESTJ" = 0b01101010, // "ESTJ",
   "INFP" = 0b10010101, // "INFP",
-  "INTJ" = 0b10011010, // "INTJ",
+  "INFJ" = 0b10010110, // "INFJ",
   "INTP" = 0b10011001, // "INTP",
-  "ISFJ" = 0b10100110, // "ISFJ",
+  "INTJ" = 0b10011010, // "INTJ",
   "ISFP" = 0b10100101, // "ISFP",
-  "ISTJ" = 0b10101010, // "ISTJ",
+  "ISFJ" = 0b10100110, // "ISFJ",
   "ISTP" = 0b10101001, // "ISTP",
+  "ISTJ" = 0b10101010, // "ISTJ",
 }
 
 const MAX_EPOCHS = 2000;
