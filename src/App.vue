@@ -1,7 +1,7 @@
 <template>
   <nav>
     <router-link to="/">Home</router-link> |
-    <router-link to="/training-grounds">Training Grounds</router-link>
+    <router-link to="/training-grounds">MBTI Training Grounds</router-link>
   </nav>
   <router-view />
 </template>

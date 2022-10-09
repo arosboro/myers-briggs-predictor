@@ -47,6 +47,8 @@ figure.chart {
 }
 figure.chart ul {
   list-style: none;
+  margin-block-end: 0;
+  margin-block-start: 0;
   padding: 0;
   width: 100%;
   height: 100%;
@@ -63,16 +65,14 @@ figure.chart ul li {
 }
 #verticalAxisLabel {
   position: absolute;
-  left: 3px;
-  writing-mode: sideways-lr;
+  left: 5px;
   margin: 0;
 }
 #origin {
   margin: 0;
   position: absolute;
-  margin-top: 300px;
-  writing-mode: sideways-lr;
-  left: 3px;
+  margin-top: 267px;
+  left: 5px;
 }
 #horizontalAxisLabel {
   position: absolute;
