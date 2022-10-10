@@ -1,6 +1,6 @@
 <template>
   <div class="controls">
-    <label for="loadWeights">Clear pre-trained weights</label>
+    <label for="loadWeights">Use pre-trained weights</label>
     <input
       type="checkbox"
       :checked="loadWeightsFromJson"

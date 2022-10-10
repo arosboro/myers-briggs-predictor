@@ -47,7 +47,6 @@ window.logBatchLoss = (percent: number) => {
 window.networkWeights = () => NetworkWeights;
 
 (async () => {
-  await fetchWeights();
   wasm_bindgen("pkg/mbti_wasm_bg.wasm").then(async (mbtiWasmModule) => {
     memory = mbtiWasmModule.memory;
     const { Dataset, Image, NeuralNetwork } = wasm_bindgen;
@@ -75,11 +74,10 @@ window.networkWeights = () => NetworkWeights;
       const data = event.data;
       if (data.checkWeights) {
         const loadWeightsFromJson = data.loadWeightsFromJson;
-        console.log(loadWeightsFromJson, "!!!");
-        if (!loadWeightsFromJson) {
-          clearWeights();
-        } else {
+        if (loadWeightsFromJson) {
           await fetchWeights();
+        } else {
+          clearWeights();
         }
         network = NeuralNetwork.new();
       }

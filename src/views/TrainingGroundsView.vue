@@ -102,6 +102,27 @@ const MAX_EPOCHS = 10;
     loadWeightsDisabled: false,
   }),
   methods: {
+    init: function () {
+      this.worker = null;
+      this.epochs = 0;
+      this.prepareButtonDisabled = true;
+      this.trainButtonDisabled = true;
+      this.drawModeDisabled = true;
+      this.nextButtonDisabled = true;
+      this.previousButtonDisabled = true;
+      this.sample_image = [];
+      this.sample_label = "None";
+      this.sample_index = 0;
+      this.classification = "None";
+      this.drawNegative = false;
+      this.trainingAccuracy = "";
+      this.testingAccuracy = "";
+      this.trainingPercent = 0;
+      this.trainingPercentString = "0%";
+      this.pointsPlotted = [];
+      this.loadWeightsFromJson = false;
+      this.loadWeightsDisabled = false;
+    },
     drawCurrentImage: function () {
       console.log("Drawing current image");
       this.worker.postMessage({
@@ -134,13 +155,13 @@ const MAX_EPOCHS = 10;
         currentImage: this.sample_index,
       });
     },
-    loadWeights: function () {
+    loadWeights: async function () {
       console.log("Loading weights");
-      this.loadWeightsFromJson = !this.loadWeightsFromJson;
-      this.worker.postMessage({
-        checkWeights: true,
-        loadWeightsFromJson: !this.loadWeightsFromJson,
-      });
+      const loadWeightsFromJson = !this.loadWeightsFromJson;
+      this.init();
+      this.resetCanvas();
+      this.loadWeightsFromJson = loadWeightsFromJson;
+      await this.initWorker();
     },
     getColor: function (color: number) {
       if (this.drawNegative) {
@@ -165,9 +186,126 @@ const MAX_EPOCHS = 10;
       this.previousButtonDisabled = false;
       this.drawModeDisabled = false;
     },
+    resetCanvas: function () {
+      if (typeof this.canvasContext !== "undefined") {
+        const canvas = document.getElementById("image") as HTMLCanvasElement;
+        this.canvasContext.clearRect(0, 0, canvas.width, canvas.height);
+      }
+    },
+    initWorker: function () {
+      this.worker = new Worker(
+        new URL("./../../worker/mbti.worker.ts", import.meta.url),
+        { type: "classic" }
+      );
+      this.worker.onerror = (ev: ErrorEvent) => {
+        console.log("Error in this.worker");
+        console.error(ev);
+      };
+      this.worker.onmessage = (event: MessageEvent) => {
+        let data = event.data;
+        if (data.loadedWorker) {
+          console.log("loadedWorker");
+          if (this.loadWeightsFromJson) {
+            this.worker.postMessage({
+              checkWeights: true,
+              loadWeightsFromJson: true,
+            });
+          } else {
+            this.worker.postMessage({
+              checkWeights: true,
+              loadWeightsFromJson: false,
+            });
+          }
+          this.prepareButtonDisabled = false;
+        }
+        if (data.datasetPrepared) {
+          console.log("datasetPrepared");
+          this.drawCurrentImage();
+          this.prepareButtonDisabled = true;
+        }
+        if (data.currentImage) {
+          console.log("currentImage");
+          this.sample_image = data.imageData;
+          this.nextButtonDisabled = false;
+          this.previousButtonDisabled = false;
+          this.drawModeDisabled = false;
+          // Draw image data to canvas
+          let color = this.sample_image[0];
+          const WIDTH = 16;
+          const HEIGHT = 16;
+          const canvas: HTMLElement | null = document.getElementById("image");
+          if (canvas instanceof HTMLCanvasElement) {
+            canvas.width = WIDTH;
+            canvas.height = HEIGHT;
+            this.canvasContext = canvas.getContext("2d");
+            this.canvasContext.fillStyle = this.getColor(color);
+            for (let y = 0; y < HEIGHT; y++) {
+              for (let x = 0; x < WIDTH; x++) {
+                let delta = x + y * HEIGHT;
+                if (this.sample_image[delta] !== color) {
+                  color = this.sample_image[delta];
+                  this.canvasContext.fillStyle = this.getColor(color);
+                }
+                this.canvasContext.fillRect(x, y, 1, 1);
+              }
+            }
+          }
+          const labels_u8 = Object.keys(MBTILabels).map((key) =>
+            parseInt(key, 10)
+          );
+          const labels = Object.values(MBTILabels).map((value) =>
+            value.toString()
+          );
+          this.sample_index = data.index;
+          this.sample_label = labels[data.label];
+          this.classification = labels[labels_u8.indexOf(data.classification)];
+          console.log(this.classification);
+          // Prevent training before the first image loads.
+          this.trainButtonDisabled = false;
+        }
+        if (data.trainedEpoch) {
+          console.log("trainedEpoch");
+          console.log(`Epoch: ${this.epochs}, Loss: ${data.loss}`);
+          if (this.epochs < MAX_EPOCHS && !this.loadWeightsFromJson) {
+            this.worker.postMessage({ trainEpoch: true });
+            this.epochs += 1;
+          } else if (this.loadWeightsFromJson) {
+            this.epochs = 0;
+            this.unBlockImageViewerUI();
+          } else {
+            this.epochs = 0;
+            this.unBlockImageViewerUI();
+          }
+        }
+        if (data.progress) {
+          this.trainingPercentString = `${
+            Math.round(data.percent * 1000) / 10
+          }%`;
+          this.trainingPercent = data.percent;
+        }
+        if (data.batchLoss) {
+          let li = document.createElement("li");
+          li.style.left = `${this.pointsPlotted.length * 5}px`;
+          li.style.bottom = `${data.percent * 300}px`;
+          this.pointsPlotted.push(li);
+        }
+        if (data.accuracy) {
+          console.log("accuracy");
+          this.trainingAccuracy = `Accuracy on Training Data: ${Math.floor(
+            data.trainingAccuracy * 100
+          )}%`;
+          this.testingAccuracy = `Accuracy on Testing Data: ${Math.floor(
+            data.testingAccuracy * 100
+          )}%`;
+        }
+      };
+      console.log(this.worker);
+      this.worker.postMessage({ loadWorker: true });
+    },
   },
   mounted() {
     console.log("Mounted");
+    this.initWorker();
     // assert(Object.keys(MBTILabels).length === 16);
     // assert(MBTILabels["ENFP"] === (MBType.E ^ MBType.N ^ MBType.F ^ MBType.P));
     // assert(MBTILabels["ENFJ"] === (MBType.E ^ MBType.N ^ MBType.F ^ MBType.J));
@@ -185,101 +323,6 @@ const MAX_EPOCHS = 10;
     // assert(MBTILabels["ISFJ"] === (MBType.I ^ MBType.S ^ MBType.F ^ MBType.J));
     // assert(MBTILabels["ISTP"] === (MBType.I ^ MBType.S ^ MBType.T ^ MBType.P));
     // assert(MBTILabels["ISTJ"] === (MBType.I ^ MBType.S ^ MBType.T ^ MBType.J));
-    this.worker = new Worker(
-      new URL("./../../worker/mbti.worker.ts", import.meta.url),
-      { type: "classic" }
-    );
-    this.worker.onerror = (ev: ErrorEvent) => {
-      console.log("Error in this.worker");
-      console.error(ev);
-    };
-    this.worker.onmessage = (event: MessageEvent) => {
-      let data = event.data;
-      if (data.loadedWorker) {
-        console.log("loadedWorker");
-        this.prepareButtonDisabled = false;
-      }
-      if (data.datasetPrepared) {
-        console.log("datasetPrepared");
-        this.drawCurrentImage();
-        this.prepareButtonDisabled = true;
-      }
-      if (data.currentImage) {
-        console.log("currentImage");
-        this.sample_image = data.imageData;
-        this.nextButtonDisabled = false;
-        this.previousButtonDisabled = false;
-        this.drawModeDisabled = false;
-        // Draw image data to canvas
-        let color = this.sample_image[0];
-        const WIDTH = 16;
-        const HEIGHT = 16;
-        const canvas: HTMLElement | null = document.getElementById("image");
-        if (canvas instanceof HTMLCanvasElement) {
-          canvas.width = WIDTH;
-          canvas.height = HEIGHT;
-          this.canvasContext = canvas.getContext("2d");
-          this.canvasContext.fillStyle = this.getColor(color);
-          for (let y = 0; y < HEIGHT; y++) {
-            for (let x = 0; x < WIDTH; x++) {
-              let delta = x + y * HEIGHT;
-              if (this.sample_image[delta] !== color) {
-                color = this.sample_image[delta];
-                this.canvasContext.fillStyle = this.getColor(color);
-              }
-              this.canvasContext.fillRect(x, y, 1, 1);
-            }
-          }
-        }
-        const labels_u8 = Object.keys(MBTILabels).map((key) =>
-          parseInt(key, 10)
-        );
-        const labels = Object.values(MBTILabels).map((value) =>
-          value.toString()
-        );
-        this.sample_index = data.index;
-        this.sample_label = labels[data.label];
-        this.classification = labels[labels_u8.indexOf(data.classification)];
-        console.log(this.classification);
-        // Prevent training before the first image loads.
-        this.trainButtonDisabled = false;
-      }
-      if (data.trainedEpoch) {
-        console.log("trainedEpoch");
-        if (this.epochs >= MAX_EPOCHS) {
-          this.unBlockImageViewerUI();
-        }
-        console.log(`Epoch: ${this.epochs}, Loss: ${data.loss}`);
-        if (this.epochs < MAX_EPOCHS) {
-          this.worker.postMessage({ trainEpoch: true });
-          this.epochs += 1;
-        } else {
-          // Enable the train
-          this.trainButtonDisabled = false;
-        }
-      }
-      if (data.progress) {
-        this.trainingPercentString = `${Math.round(data.percent * 1000) / 10}%`;
-        this.trainingPercent = data.percent;
-      }
-      if (data.batchLoss) {
-        let li = document.createElement("li");
-        li.style.left = `${this.pointsPlotted.length * 5}px`;
-        li.style.bottom = `${data.percent * 300}px`;
-        this.pointsPlotted.push(li);
-      }
-      if (data.accuracy) {
-        console.log("accuracy");
-        this.trainingAccuracy = `Accuracy on Training Data: ${Math.floor(
-          data.trainingAccuracy * 100
-        )}%`;
-        this.testingAccuracy = `Accuracy on Testing Data: ${Math.floor(
-          data.testingAccuracy * 100
-        )}%`;
-      }
-    };
-    console.log(this.worker);
-    this.worker.postMessage({ loadWorker: true });
   },
 })
 export default class TrainingGroundsView extends Vue {
@@ -302,6 +345,7 @@ export default class TrainingGroundsView extends Vue {
   pointsPlotted: HTMLLIElement[] = [];
   loadWeightsFromJson = false;
   loadWeightsDisabled = false;
+  init!: () => void;
   drawCurrentImage!: () => void;
   drawPreviousImage!: () => void;
   drawNextImage!: () => void;
@@ -309,6 +353,8 @@ export default class TrainingGroundsView extends Vue {
   getColor!: (color: number) => string;
   blockImageViewerUI!: () => void;
   unBlockImageViewerUI!: () => void;
+  resetCanvas!: () => void;
+  initWorker!: () => void;
   loadWeights!: () => void;
 }
 </script>
