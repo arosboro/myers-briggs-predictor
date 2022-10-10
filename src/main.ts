@@ -2,7 +2,7 @@ declare global {
   interface Window {
     logProgress: (progress: number) => void;
     logBatchLoss: (loss: number) => void;
-    networkWeights: () => string;
+    getNetworkWeights: () => string;
   }
 }
 

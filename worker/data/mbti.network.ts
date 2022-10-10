@@ -1,16 +1,29 @@
 let NetworkWeights = "";
 
-const fetchWeights = async () =>
+const setNetworkWeights = (weights: string) => {
+  NetworkWeights = weights;
+};
+
+const getNetworkWeights = () => {
+  return NetworkWeights;
+};
+
+const fetchNetworkWeights = async () =>
   await fetch("../data/network.json")
     .then((response) => response.json())
     .then((raw) => {
-      NetworkWeights = JSON.stringify(raw);
+      setNetworkWeights(JSON.stringify(raw));
       console.log("Network weights loaded");
     });
 
 const clearWeights = () => {
-  NetworkWeights = "";
+  setNetworkWeights("");
   console.log("Network weights cleared");
 };
 
-export { NetworkWeights, fetchWeights, clearWeights };
+export {
+  fetchNetworkWeights,
+  setNetworkWeights,
+  getNetworkWeights,
+  clearWeights,
+};

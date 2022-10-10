@@ -103,7 +103,8 @@ const MAX_EPOCHS = 10;
   }),
   methods: {
     init: function () {
-      this.worker = null;
+      // don't reset the worker incase it has already fetched assets.
+      // this.worker = null;
       this.epochs = 0;
       this.prepareButtonDisabled = true;
       this.trainButtonDisabled = true;
@@ -161,7 +162,10 @@ const MAX_EPOCHS = 10;
       this.init();
       this.resetCanvas();
       this.loadWeightsFromJson = loadWeightsFromJson;
-      await this.initWorker();
+      this.worker.postMessage({
+        checkWeights: true,
+        loadWeightsFromJson: loadWeightsFromJson,
+      });
     },
     getColor: function (color: number) {
       if (this.drawNegative) {
@@ -193,6 +197,7 @@ const MAX_EPOCHS = 10;
       }
     },
     initWorker: function () {
+      this.worker = null;
       this.worker = new Worker(
         new URL("./../../worker/mbti.worker.ts", import.meta.url),
         { type: "classic" }
@@ -203,19 +208,12 @@ const MAX_EPOCHS = 10;
       };
       this.worker.onmessage = (event: MessageEvent) => {
         let data = event.data;
+        if (data.loadedWeights) {
+          console.log("loadedWeights");
+          this.prepareButtonDisabled = false;
+        }
         if (data.loadedWorker) {
           console.log("loadedWorker");
-          if (this.loadWeightsFromJson) {
-            this.worker.postMessage({
-              checkWeights: true,
-              loadWeightsFromJson: true,
-            });
-          } else {
-            this.worker.postMessage({
-              checkWeights: true,
-              loadWeightsFromJson: false,
-            });
-          }
           this.prepareButtonDisabled = false;
         }
         if (data.datasetPrepared) {

@@ -42,8 +42,8 @@ extern "C" {
     fn logProgress(percent: f64);
     #[wasm_bindgen(js_namespace = globalThis, js_name = "logBatchLoss")]
     fn logBatchLoss(percent: f64);
-    #[wasm_bindgen(js_namespace = globalThis, js_name = "networkWeights")]
-    fn networkWeights() -> String;
+    #[wasm_bindgen(js_namespace = globalThis, js_name = "getNetworkWeights")]
+    fn getNetworkWeights() -> String;
 }
 
 /**
@@ -57,8 +57,8 @@ fn log_batch_loss(percent: f64) {
     logBatchLoss(percent);
 }
 
-fn network_weights() -> String {
-    return networkWeights();
+fn get_network_weights() -> String {
+    return getNetworkWeights();
 }
 
 const WIDTH: usize = 16;
@@ -324,7 +324,7 @@ impl NeuralNetwork {
     /// Creates a new Neural Network configuration of randomised weights
     /// and a simple feed forward architecture.
     pub fn new() -> NeuralNetwork {
-        let weights: String = network_weights();
+        let weights: String = get_network_weights();
 
         if weights.as_str() != "" {
             let network = NeuralNetwork::from_json(&weights.as_str());

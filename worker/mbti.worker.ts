@@ -1,8 +1,8 @@
 console.log("Initializing Worker...");
 import MBTI from "./data/mbti.data";
 import {
-  NetworkWeights,
-  fetchWeights,
+  fetchNetworkWeights,
+  getNetworkWeights,
   clearWeights,
 } from "./data/mbti.network";
 import { Raw, Sample, MBTIDataset } from "./data/mbti.types";
@@ -43,8 +43,9 @@ window.logBatchLoss = (percent: number) => {
     percent: percent,
   });
 };
-
-window.networkWeights = () => NetworkWeights;
+window.getNetworkWeights = () => {
+  return getNetworkWeights();
+};
 
 (async () => {
   wasm_bindgen("pkg/mbti_wasm_bg.wasm").then(async (mbtiWasmModule) => {
@@ -75,11 +76,15 @@ window.networkWeights = () => NetworkWeights;
       if (data.checkWeights) {
         const loadWeightsFromJson = data.loadWeightsFromJson;
         if (loadWeightsFromJson) {
-          await fetchWeights();
+          await fetchNetworkWeights();
         } else {
           clearWeights();
         }
         network = NeuralNetwork.new();
+        // Signal that the UI can unblock;
+        postMessage({
+          loadedWeights: true,
+        });
       }
       if (data.prepareDataset) {
         console.log("Worker: Preparing dataset...");

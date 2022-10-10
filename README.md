@@ -34,7 +34,7 @@ Type Indicators (MBTIs) are focused on.
 ## Current State of Affairs
 
 1. Procedurally generated 16x16 pixel heatmaps with validated labels have been provided
-2. Network weights for a network trained to thousands of epochs have been provided
+2. Network weights for a network trained to 7 epochs have been provided, 0% loss.
 3. Vue Components replecate the scaffold's User Interface functionality with TypeScript
 4. WebWorker and data fetching ported from JavaScript to TypeScript
 5. Vue.js niceties such as prettier ensure that the code smell is reduced
