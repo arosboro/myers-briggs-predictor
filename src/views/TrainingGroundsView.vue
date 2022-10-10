@@ -3,9 +3,12 @@
     <h1>MBTI Training Grounds</h1>
     <TrainingActions
       @train-epoch="blockImageViewerUI"
+      @load-weights="loadWeights"
       :worker="worker"
       :prepareButtonDisabled="prepareButtonDisabled"
       :trainButtonDisabled="trainButtonDisabled"
+      :loadWeightsFromJson="loadWeightsFromJson"
+      :loadWeightsDisabled="loadWeightsDisabled"
     />
     <ImageViewer
       @draw-previous-image="drawPreviousImage"
@@ -68,7 +71,7 @@ export enum MBTILabels {
   "ISTJ" = 0b10101010, // "ISTJ",
 }
 
-const MAX_EPOCHS = 2000;
+const MAX_EPOCHS = 10;
 
 @Options({
   components: {
@@ -95,6 +98,8 @@ const MAX_EPOCHS = 2000;
     trainingPercent: 0,
     trainingPercentString: "0%",
     pointsPlotted: [],
+    loadWeightsFromJson: false,
+    loadWeightsDisabled: false,
   }),
   methods: {
     drawCurrentImage: function () {
@@ -129,6 +134,14 @@ const MAX_EPOCHS = 2000;
         currentImage: this.sample_index,
       });
     },
+    loadWeights: function () {
+      console.log("Loading weights");
+      this.loadWeightsFromJson = !this.loadWeightsFromJson;
+      this.worker.postMessage({
+        checkWeights: true,
+        loadWeightsFromJson: !this.loadWeightsFromJson,
+      });
+    },
     getColor: function (color: number) {
       if (this.drawNegative) {
         return `rgb(${color * 255}, ${color * 255}, ${color * 255})`;
@@ -139,31 +152,39 @@ const MAX_EPOCHS = 2000;
       }
     },
     blockImageViewerUI: function () {
+      this.loadWeightsDisabled = true;
       this.trainButtonDisabled = true;
       this.nextButtonDisabled = true;
       this.previousButtonDisabled = true;
       this.drawModeDisabled = true;
     },
+    unBlockImageViewerUI: function () {
+      this.loadWeightsDisabled = false;
+      this.trainButtonDisabled = false;
+      this.nextButtonDisabled = false;
+      this.previousButtonDisabled = false;
+      this.drawModeDisabled = false;
+    },
   },
   mounted() {
     console.log("Mounted");
     // assert(Object.keys(MBTILabels).length === 16);
-    // assert(MBTILabels["ENFJ"] === (MBType.E ^ MBType.N ^ MBType.F ^ MBType.J));
     // assert(MBTILabels["ENFP"] === (MBType.E ^ MBType.N ^ MBType.F ^ MBType.P));
-    // assert(MBTILabels["ENTJ"] === (MBType.E ^ MBType.N ^ MBType.T ^ MBType.J));
+    // assert(MBTILabels["ENFJ"] === (MBType.E ^ MBType.N ^ MBType.F ^ MBType.J));
     // assert(MBTILabels["ENTP"] === (MBType.E ^ MBType.N ^ MBType.T ^ MBType.P));
-    // assert(MBTILabels["ESFJ"] === (MBType.E ^ MBType.S ^ MBType.F ^ MBType.J));
+    // assert(MBTILabels["ENTJ"] === (MBType.E ^ MBType.N ^ MBType.T ^ MBType.J));
     // assert(MBTILabels["ESFP"] === (MBType.E ^ MBType.S ^ MBType.F ^ MBType.P));
-    // assert(MBTILabels["ESTJ"] === (MBType.E ^ MBType.S ^ MBType.T ^ MBType.J));
+    // assert(MBTILabels["ESFJ"] === (MBType.E ^ MBType.S ^ MBType.F ^ MBType.J));
     // assert(MBTILabels["ESTP"] === (MBType.E ^ MBType.S ^ MBType.T ^ MBType.P));
-    // assert(MBTILabels["INFJ"] === (MBType.I ^ MBType.N ^ MBType.F ^ MBType.J));
+    // assert(MBTILabels["ESTJ"] === (MBType.E ^ MBType.S ^ MBType.T ^ MBType.J));
     // assert(MBTILabels["INFP"] === (MBType.I ^ MBType.N ^ MBType.F ^ MBType.P));
-    // assert(MBTILabels["INTJ"] === (MBType.I ^ MBType.N ^ MBType.T ^ MBType.J));
+    // assert(MBTILabels["INFJ"] === (MBType.I ^ MBType.N ^ MBType.F ^ MBType.J));
     // assert(MBTILabels["INTP"] === (MBType.I ^ MBType.N ^ MBType.T ^ MBType.P));
-    // assert(MBTILabels["ISFJ"] === (MBType.I ^ MBType.S ^ MBType.F ^ MBType.J));
+    // assert(MBTILabels["INTJ"] === (MBType.I ^ MBType.N ^ MBType.T ^ MBType.J));
     // assert(MBTILabels["ISFP"] === (MBType.I ^ MBType.S ^ MBType.F ^ MBType.P));
-    // assert(MBTILabels["ISTJ"] === (MBType.I ^ MBType.S ^ MBType.T ^ MBType.J));
+    // assert(MBTILabels["ISFJ"] === (MBType.I ^ MBType.S ^ MBType.F ^ MBType.J));
     // assert(MBTILabels["ISTP"] === (MBType.I ^ MBType.S ^ MBType.T ^ MBType.P));
+    // assert(MBTILabels["ISTJ"] === (MBType.I ^ MBType.S ^ MBType.T ^ MBType.J));
     this.worker = new Worker(
       new URL("./../../worker/mbti.worker.ts", import.meta.url),
       { type: "classic" }
@@ -225,6 +246,9 @@ const MAX_EPOCHS = 2000;
       }
       if (data.trainedEpoch) {
         console.log("trainedEpoch");
+        if (this.epochs >= MAX_EPOCHS) {
+          this.unBlockImageViewerUI();
+        }
         console.log(`Epoch: ${this.epochs}, Loss: ${data.loss}`);
         if (this.epochs < MAX_EPOCHS) {
           this.worker.postMessage({ trainEpoch: true });
@@ -276,12 +300,16 @@ export default class TrainingGroundsView extends Vue {
   trainingPercent = 0;
   trainingPercentString = "0%";
   pointsPlotted: HTMLLIElement[] = [];
+  loadWeightsFromJson = false;
+  loadWeightsDisabled = false;
   drawCurrentImage!: () => void;
   drawPreviousImage!: () => void;
   drawNextImage!: () => void;
   drawNegativeImage!: () => void;
   getColor!: (color: number) => string;
   blockImageViewerUI!: () => void;
+  unBlockImageViewerUI!: () => void;
+  loadWeights!: () => void;
 }
 </script>
 

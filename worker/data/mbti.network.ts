@@ -8,4 +8,9 @@ const fetchWeights = async () =>
       console.log("Network weights loaded");
     });
 
-export { NetworkWeights, fetchWeights };
+const clearWeights = () => {
+  NetworkWeights = "";
+  console.log("Network weights cleared");
+};
+
+export { NetworkWeights, fetchWeights, clearWeights };

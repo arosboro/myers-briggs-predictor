@@ -1,6 +1,10 @@
 console.log("Initializing Worker...");
 import MBTI from "./data/mbti.data";
-import { NetworkWeights, fetchWeights } from "./data/mbti.network";
+import {
+  NetworkWeights,
+  fetchWeights,
+  clearWeights,
+} from "./data/mbti.network";
 import { Raw, Sample, MBTIDataset } from "./data/mbti.types";
 if (typeof importScripts === "function") {
   console.log("Worker: Starting, importScripts available.");
@@ -49,7 +53,7 @@ window.networkWeights = () => NetworkWeights;
     const { Dataset, Image, NeuralNetwork } = wasm_bindgen;
     const trainingDataset = Dataset.new_training();
     const testingDataset = Dataset.new_testing();
-    const network = NeuralNetwork.new();
+    let network = NeuralNetwork.new();
 
     const intoImage = (image: Raw) => {
       const imageWasm = Image.new();
@@ -69,6 +73,16 @@ window.networkWeights = () => NetworkWeights;
 
     onmessage = async (event) => {
       const data = event.data;
+      if (data.checkWeights) {
+        const loadWeightsFromJson = data.loadWeightsFromJson;
+        console.log(loadWeightsFromJson, "!!!");
+        if (!loadWeightsFromJson) {
+          clearWeights();
+        } else {
+          await fetchWeights();
+        }
+        network = NeuralNetwork.new();
+      }
       if (data.prepareDataset) {
         console.log("Worker: Preparing dataset...");
         const dataset: MBTIDataset | undefined = MBTI.set?.(

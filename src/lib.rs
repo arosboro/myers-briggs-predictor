@@ -66,8 +66,8 @@ const HEIGHT: usize = 16;
 // const SAMPLES: usize = 6483;
 const TRAINING_SIZE: usize = 5186;
 const TESTING_SIZE: usize = 1297;
-const LEARNING_RATE: f64 = 0.2;
-const LEARNING_RATE_DISCOUNT_FACTOR: f64 = 0.95;
+const LEARNING_RATE: f64 = 0.32;
+const LEARNING_RATE_DISCOUNT_FACTOR: f64 = 0.96875;
 
 /// mbti data is grayscale 0-1 range
 type Pixel = f64;
@@ -303,8 +303,8 @@ pub struct NeuralNetwork {
     //buffer: Vec<f64>,
 }
 
-const FIRST_HIDDEN_LAYER_SIZE: usize = 256;
-const SECOND_HIDDEN_LAYER_SIZE: usize = 128;
+const FIRST_HIDDEN_LAYER_SIZE: usize = 128;
+const SECOND_HIDDEN_LAYER_SIZE: usize = 64;
 const OUTPUT_LAYER_SIZE: usize = 16;
 
 // fn relu<T: Numeric + Copy>(x: T) -> T {
@@ -485,7 +485,7 @@ impl<'a> NeuralNetworkTraining<'a> {
         }
         NeuralNetworkTraining {
             weights,
-            learning_rate: LEARNING_RATE * LEARNING_RATE_DISCOUNT_FACTOR.powi(epochs - 1175),
+            learning_rate: LEARNING_RATE * LEARNING_RATE_DISCOUNT_FACTOR.powi(epochs),
         }
     }
 
