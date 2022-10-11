@@ -1,8 +1,13 @@
 # Myers Briggs Predictor
 
-## This could be a great skipping stone to your next stateful front-end project.
+### This could be a great skipping stone to your next stateful front-end project.
 
-Please :star: or :fork: to show attribution or gratitude, as always.
+Please :star: (star) or :fork_and_knife: (fork) to show attribution or gratitude,
+as always.
+
+---
+
+## Origins
 
 Heavily inspired by https://github.com/Skeletonxf/easy-ml-mnist-wasm-example.
 
